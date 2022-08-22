@@ -10,3 +10,6 @@ contract Navich is ERC20 {
         _mint(msg.sender, tokenAmount);
     }
 }
+
+
+
