@@ -3,7 +3,7 @@ pragma solidity 0.8.7;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
 
-contract Navich2 is ERC20 {
+contract Navich2 is ERC20, Pausable {
 
     ERC20 immutable navich;
     address public immutable contractOwner;
@@ -14,16 +14,21 @@ contract Navich2 is ERC20 {
         contractOwner = msg.sender;
     }
 
-    function buyNavich2(uint256 tokensAmount) public {
-
-        uint256 publicFee = tokensAmount;
-
-        navich.transferFrom(msg.sender, contractOwner, tokensAmount);
+    function buyNavich2(uint256 tokensAmount) public whenNotPaused {
 
         require(balanceOf(msg.sender) == 0, "Tokens already minted at this address");
         require(totalSupply() + tokensAmount <= MAX_SUPPLY, "Sold out =D");
-        require(tokensAmount == publicFee, "Not Enough Fee");
 
+        navich.transferFrom(msg.sender, contractOwner, tokensAmount);
         _mint(msg.sender, tokensAmount);
     }
+
+    function pauseContract() external {
+        _pause();
+    }
+    function unPauseContract() external {
+        _unpause();
+    }
+    
 }
+
