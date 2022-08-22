@@ -7,6 +7,6 @@ contract Navich is ERC20 {
     constructor() ERC20("Navich", "NAVICH") {}
 
     function buyNavich(uint256 tokenAmount) public {
-        _mint(msg.sender, tokenAmount * 10**18);
+        _mint(msg.sender, tokenAmount);
     }
 }
