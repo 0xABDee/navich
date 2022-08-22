@@ -7,31 +7,24 @@ contract Navich2 is ERC20 {
 
     ERC20 immutable navich;
     address public immutable contractOwner;
-    uint256 public constant MAX_SUPPLY = 55555;
-    uint256 public constant NAVICH_2_PRICE = 2;
+    uint256 public constant MAX_SUPPLY = 55 * 10**18;
 
-    constructor(address _navich) ERC20("Navich 2.0", "NAVICH2") {
+    constructor(address _navich) ERC20("Navich 2.0", "NAVICH2.0") {
         navich = ERC20(_navich);
         contractOwner = msg.sender;
     }
 
-    function buyNavich2(uint256 tokensAmount, uint256 _amountFee) public payable {
+    function buyNavich2(uint256 tokensAmount) public {
 
-        navich.transferFrom(msg.sender, contractOwner, _amountFee);
+        uint256 publicFee  = tokensAmount;
+        uint256 tokensAmountInDecimals = tokensAmount * 10**18;
 
-        uint256 publicFee  = tokensAmount * NAVICH_2_PRICE;
-        uint256 privateSaleFee = publicFee/2; 
-        uint256 saleStart = block.timestamp + 3600;           // Sale Starts in 1 hour
-        uint256 saleEnd = saleStart + 18000;                  //Sale Ends after 5 hours
+        navich.transferFrom(msg.sender, contractOwner, tokensAmountInDecimals);
 
+        require(balanceOf(msg.sender) == 0, "Tokens already minted at this address");
         require(totalSupply() + tokensAmount <= MAX_SUPPLY, "Sold out =D");
+        require(tokensAmount == publicFee, "Not Enough Fee");
 
-        if(block.timestamp >= saleStart && block.timestamp <= saleEnd /*&& tokenPriceOnSale != 0*/){
-            require(_amountFee == privateSaleFee, "Not Enough Fee on-Sale");
-        } else {
-            require(_amountFee == publicFee, "Not Enough Fee");
-        }
-
-        _mint(msg.sender, tokensAmount);
+        _mint(msg.sender, tokensAmountInDecimals);
     }
 }
