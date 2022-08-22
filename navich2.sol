@@ -7,20 +7,32 @@ contract Navich2 is ERC20, Pausable {
 
     ERC20 immutable navich;
     address public immutable contractOwner;
-    uint256 public constant MAX_SUPPLY = 55555;
+    uint256 public constant MAX_SUPPLY = 55;
+    uint256 public constant NAVICH_2_PRICE = 2;
 
     constructor(address _navich) ERC20("Navich 2.0", "NAVICH2.0") {
         navich = ERC20(_navich);
         contractOwner = msg.sender;
     }
 
-    function buyNavich2(uint256 tokensAmount) public whenNotPaused {
+    function buyNavich2(uint256 navichFee, uint256 navich2Amount) public whenNotPaused {
+
+        uint256 publicFee  = navich2Amount * NAVICH_2_PRICE;
+        uint256 privateSaleFee = publicFee/2; 
+        uint256 saleStart = block.timestamp + 3600;           // Sale Starts in 1 hour
+        uint256 saleEnd = saleStart + 18000;
 
         require(balanceOf(msg.sender) == 0, "Tokens already minted at this address");
-        require(totalSupply() + tokensAmount <= MAX_SUPPLY, "Sold out =D");
+        require(totalSupply() + navich2Amount <= MAX_SUPPLY, "Sold out =D");
 
-        navich.transferFrom(msg.sender, contractOwner, tokensAmount);
-        _mint(msg.sender, tokensAmount);
+        if(block.timestamp >= saleStart && block.timestamp <= saleEnd){
+            require(navichFee == privateSaleFee, "Not Enough Fee on-Sale");
+        } else {
+            require(navichFee == publicFee, "Not Enough Fee");
+        }
+
+        navich.transferFrom(msg.sender, contractOwner, navichFee);
+        _mint(msg.sender, navich2Amount);
     }
 
     function pauseContract() external {
